@@ -14,9 +14,10 @@ class Board:
 
     # Метод, который отрисовывает игровое поле.
     def display(self):
-        for row in self.board:
-            print('|'.join(row))
-            print('-' * 5)
+        for i, row in enumerate(self.board):
+            print(('|').join(row))
+            if i < self.field_size-1:
+                print('-' * 5)
 
     def __str__(self):
         return (
