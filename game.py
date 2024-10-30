@@ -1,3 +1,4 @@
+from datetime import datetime
 from gameparts import Board
 from gameparts.exceptions import FieldIndexError, CellOccupiedError
 
@@ -5,11 +6,12 @@ from gameparts.exceptions import FieldIndexError, CellOccupiedError
 def main():
     game = Board()
     current_player = 'X'
+    running = True
 
     print('Добро пожаловать в игру "крестики-нолики"!\n')
     game.display()
 
-    while True:
+    while running:
 
         print(f'\nСейчас ходят {current_player}')
 
@@ -41,15 +43,43 @@ def main():
         game.make_move(row, column, current_player)
         game.display()
 
-        if game.check_win(current_player):
-            print(f'\nПобедили {current_player}!')
-            break
+        running = check_for_game_over(game, current_player)
 
-        if game.is_board_full():
-            print('\nНичья!')
-            break
+        current_player = change_player(current_player)
 
-        current_player = 'O' if current_player == 'X' else 'X'
+
+def change_player(current_player):
+    current_player = 'O' if current_player == 'X' else 'X'
+    return current_player
+
+
+def game_result(result, winner_name=''):
+    game_end_time = datetime.now().strftime('%d/%m/%Y %H:%M')
+    log_text = f'{game_end_time} {result}{winner_name}\n'
+    save_result(log_text)
+
+
+def check_for_game_over(game, current_player):
+    if game.check_win(current_player):
+        result = f'Победили {current_player}!'
+        print(f'\n{result}')
+        winner_name = f' Победитель: {input('Введите имя победителя: ')}'
+        game_result(result, winner_name)
+        return False
+
+    if game.is_board_full():
+        result = 'Ничья!'
+        print(f'\n{result}')
+        game_result(result, winner_name='')
+        return False
+
+    return True
+
+
+def save_result(log_text):
+    result_log = open('results.txt', 'a')
+    result_log.write(log_text)
+    result_log.close()
 
 
 if __name__ == '__main__':
