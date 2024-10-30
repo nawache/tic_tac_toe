@@ -4,48 +4,46 @@ from gameparts.exceptions import FieldIndexError, CellOccupiedError
 
 
 def main():
-    game = Board()
-    current_player = 'X'
-    running = True
-
     print('Добро пожаловать в игру "крестики-нолики"!\n')
+    game = Board()
     game.display()
+    current_player = 'X'
 
+    running = True
     while running:
-
         print(f'\nСейчас ходят {current_player}')
-
-        while True:
-            try:
-                row = int(input('Введите номер строки: '))
-                if row < 1 or row > game.field_size:
-                    raise FieldIndexError
-                column = int(input('Введите номер столбца: '))
-                if column < 1 or column > game.field_size:
-                    raise FieldIndexError
-                if game.board[row-1][column-1] != ' ':
-                    raise CellOccupiedError
-            except FieldIndexError:
-                print(f'Значение должно быть от 1 до {game.field_size}.')
-                continue
-            except ValueError:
-                print('Буквы вводить нельзя. Только числа.')
-                print('Пожалуйста, введите значения заново.')
-            except CellOccupiedError:
-                print('Ячейка уже занята!')
-                print('Введите другие координаты.')
-            except Exception as e:
-                print(f'Возникла ошибка: {e}.')
-            else:
-                print('\n')
-                break
-
+        row, column = coordinates_input(game)
         game.make_move(row, column, current_player)
         game.display()
-
         running = check_for_game_over(game, current_player)
-
         current_player = change_player(current_player)
+
+
+def coordinates_input(game):
+    while True:
+        try:
+            row = int(input('Введите номер строки: '))
+            if row < 1 or row > game.field_size:
+                raise FieldIndexError
+            column = int(input('Введите номер столбца: '))
+            if column < 1 or column > game.field_size:
+                raise FieldIndexError
+            if game.board[row-1][column-1] != ' ':
+                raise CellOccupiedError
+        except FieldIndexError:
+            print(f'Значение должно быть от 1 до {game.field_size}.')
+            continue
+        except ValueError:
+            print('Буквы вводить нельзя. Только числа.')
+            print('Пожалуйста, введите значения заново.')
+        except CellOccupiedError:
+            print('Ячейка уже занята!')
+            print('Введите другие координаты.')
+        except Exception as e:
+            print(f'Возникла ошибка: {e}.')
+        else:
+            print('\n')
+            return row, column
 
 
 def change_player(current_player):
