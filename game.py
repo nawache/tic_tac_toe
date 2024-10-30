@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import sleep
 
 import pygame
 
@@ -18,8 +19,8 @@ CELL_SIZE = 100
 BOARD_SIZE = 3
 WIDTH = HEIGHT = CELL_SIZE * BOARD_SIZE
 LINE_WIDTH = 15
-BG_COLOR = PALETTE['APRICOT']
-LINE_COLOR = PALETTE['CORAL_PINK']
+BG_COLOR = PALETTE['LIGHT_ORANGE']
+LINE_COLOR = PALETTE['MELON']
 X_COLOR = PALETTE['TYRIAN_PURPLE']
 O_COLOR = PALETTE['DARK_SPRING_GREEN']
 X_WIDTH = 15
@@ -155,6 +156,7 @@ def main():
 
         pygame.display.update()
 
+    sleep(1)
     pygame.quit()
 
 
