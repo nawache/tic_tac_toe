@@ -5,20 +5,14 @@ class Board:
     field_size = 3
 
     def __init__(self):
-        self.board = [[' ' for _ in range(self.field_size)]
-                      for _ in range(self.field_size)]
+        self.board = [[' ' for i in range(self.field_size)]
+                      for i in range(self.field_size)]
 
     # Метод, который обрабатывает ходы игроков.
     def make_move(self, row, col, player):
-        self.board[row-1][col-1] = player
+        self.board[row][col] = player
 
-    # Метод, который отрисовывает игровое поле.
-    def display(self):
-        for i, row in enumerate(self.board, 1):
-            print('|'.join(row))
-            if i < self.field_size:
-                print('-' * 5)
-
+    # Метод, который проверяет, остались ли свободные ячейки.
     def is_board_full(self):
         for i in range(self.field_size):
             for j in range(self.field_size):
@@ -26,6 +20,7 @@ class Board:
                     return False
         return True
 
+    # Метод, который проверяет, есть ли победитель.
     def check_win(self, player):
         for i in range(self.field_size):
             if (all([self.board[i][j] == player

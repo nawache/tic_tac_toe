@@ -1,85 +1,115 @@
 from datetime import datetime
+
+import pygame
+
 from gameparts import Board
-from gameparts.exceptions import FieldIndexError, CellOccupiedError
 
 
-def main():
-    print('Добро пожаловать в игру "крестики-нолики"!\n')
-    
-    game = Board()
-    game.display()
+PALETTE = {
+    'LIGHT_ORANGE': (255, 218, 185),
+    'APRICOT': (251, 196, 171),
+    'MELON': (248, 173, 157),
+    'CORAL_PINK': (244, 151, 142),
+    'LIGHT_CORAL': (240, 128, 128),
+    'DARK_SPRING_GREEN': (34, 111, 84),
+    'TYRIAN_PURPLE': (100, 17, 63)
+}
+CELL_SIZE = 100
+BOARD_SIZE = 3
+WIDTH = HEIGHT = CELL_SIZE * BOARD_SIZE
+LINE_WIDTH = 15
+BG_COLOR = PALETTE['APRICOT']
+LINE_COLOR = PALETTE['CORAL_PINK']
+X_COLOR = PALETTE['TYRIAN_PURPLE']
+O_COLOR = PALETTE['DARK_SPRING_GREEN']
+X_WIDTH = 15
+O_WIDTH = 15
+SPACE = CELL_SIZE // 4
 
-    current_player = 'X'
-
-    running = True
-    while running:
-        print(f'\nСейчас ходят {current_player}')
-
-        row, column = coordinates_input(game)
-        game.make_move(row, column, current_player)
-        game.display()
-
-        running = check_for_game_over(game, current_player)
-        current_player = change_player(current_player)
-
-
-def coordinates_input(game):
-    while True:
-        try:
-
-            row = int(input('Введите номер строки: '))
-            if row < 1 or row > game.field_size:
-                raise FieldIndexError
-            column = int(input('Введите номер столбца: '))
-            if column < 1 or column > game.field_size:
-                raise FieldIndexError
-            if game.board[row-1][column-1] != ' ':
-                raise CellOccupiedError
-            
-        except FieldIndexError:
-
-            print(f'Значение должно быть от 1 до {game.field_size}.')
-            continue
-
-        except ValueError:
-
-            print('Буквы вводить нельзя. Только числа.')
-            print('Пожалуйста, введите значения заново.')
-
-        except CellOccupiedError:
-
-            print('Ячейка уже занята!')
-            print('Введите другие координаты.')
-
-        except Exception as e:
-
-            print(f'Возникла ошибка: {e}.')
-
-        else:
-
-            print('\n')
-            return row, column
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('Крестики-нолики')
+screen.fill(BG_COLOR)
 
 
-def change_player(current_player):
-    return 'O' if current_player == 'X' else 'X'
+def draw_lines():
+    for i in range(1, BOARD_SIZE):
+        pygame.draw.line(
+            screen,
+            LINE_COLOR,
+            (0, i * CELL_SIZE),
+            (WIDTH, i * CELL_SIZE),
+            LINE_WIDTH
+        )
+
+    for i in range(1, BOARD_SIZE):
+        pygame.draw.line(
+            screen,
+            LINE_COLOR,
+            (i * CELL_SIZE, 0),
+            (i * CELL_SIZE, HEIGHT),
+            LINE_WIDTH
+        )
 
 
-def save_game_result(result, winner_name=''):
-    game_end_time = datetime.now().strftime('%d/%m/%Y %H:%M')
-    log_text = f'{game_end_time} {result}{winner_name}\n'
-    with open('results.txt', 'a') as result_log:
-        result_log.write(log_text)
+def draw_figures(board):
+    for row in range(BOARD_SIZE):
+        for col in range(BOARD_SIZE):
+            if board[row][col] == 'X':
+                pygame.draw.line(
+                    screen,
+                    X_COLOR,
+                    (col * CELL_SIZE + SPACE, row * CELL_SIZE + SPACE),
+                    (
+                        col * CELL_SIZE + CELL_SIZE - SPACE,
+                        row * CELL_SIZE + CELL_SIZE - SPACE
+                    ),
+                    X_WIDTH
+                )
+                pygame.draw.line(
+                    screen,
+                    X_COLOR,
+                    (
+                        col * CELL_SIZE + SPACE,
+                        row * CELL_SIZE + CELL_SIZE - SPACE),
+                    (
+                        col * CELL_SIZE + CELL_SIZE - SPACE,
+                        row * CELL_SIZE + SPACE
+                    ),
+                    X_WIDTH
+                )
+            elif board[row][col] == 'O':
+                pygame.draw.circle(
+                    screen,
+                    O_COLOR,
+                    (
+                        col * CELL_SIZE + CELL_SIZE // 2,
+                        row * CELL_SIZE + CELL_SIZE // 2
+                    ),
+                    CELL_SIZE // 2 - SPACE,
+                    O_WIDTH
+                )
 
 
-def check_for_game_over(game, current_player):
-    if game.check_win(current_player):
+def next_player(player):
+    return 'O' if player == 'X' else 'X'
 
-        result = f'Победили {current_player}!'
+
+def save_game_result(result):
+    game_date = datetime.now().strftime('%d/%m/%Y %H:%M')
+    winner = '' if result == 'Ничья!' else f' Победитель: {
+        input('Введите имя победителя: ')}'
+    log_text = f'{game_date} {result}{winner}\n'
+    with open('results.txt', 'a') as results:
+        results.write(log_text)
+
+
+def check_for_game_over(game, player):
+    if game.check_win(player):
+
+        result = f'Победили {player}!'
         print(f'\n{result}')
 
-        winner_name = f' Победитель: {input('Введите имя победителя: ')}'
-        save_game_result(result, winner_name)
+        save_game_result(result)
 
         return False
 
@@ -93,6 +123,39 @@ def check_for_game_over(game, current_player):
         return False
 
     return True
+
+
+def main():
+    print('Добро пожаловать в игру "крестики-нолики"!\n')
+
+    game = Board()
+    draw_lines()
+
+    current_player = 'X'
+
+    running = True
+    while running:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_y = event.pos[0]
+                mouse_x = event.pos[1]
+
+                clicked_row = mouse_x // CELL_SIZE
+                clicked_col = mouse_y // CELL_SIZE
+
+                if game.board[clicked_row][clicked_col] == ' ':
+                    game.make_move(clicked_row, clicked_col, current_player)
+                    running = check_for_game_over(game, current_player)
+                    current_player = next_player(current_player)
+                    draw_figures(game.board)
+
+        pygame.display.update()
+
+    pygame.quit()
 
 
 if __name__ == '__main__':
