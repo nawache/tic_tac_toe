@@ -95,39 +95,36 @@ def next_player(player):
     return 'O' if player == 'X' else 'X'
 
 
-def save_game_result(result):
-    game_date = datetime.now().strftime('%d/%m/%Y %H:%M')
-    winner = '' if result == 'Ничья!' else f' Победитель: {
-        input('Введите имя победителя: ')}'
-    log_text = f'{game_date} {result}{winner}\n'
-    with open('results.txt', 'a') as results:
-        results.write(log_text)
-
-
 def check_for_game_over(game, player):
+    global result
     if game.check_win(player):
-
         result = f'Победили {player}!'
-        print(f'\n{result}')
-
-        save_game_result(result)
-
+        print(result)
         return False
 
     if game.is_board_full():
-
         result = 'Ничья!'
-        print(f'\n{result}')
-
-        save_game_result(result)
-
+        print(result)
         return False
 
     return True
 
 
+def get_winner_name(result):
+    return '' if result == 'Ничья!' else f' Победитель: {input(
+        'Введите имя победителя: ')}'
+
+
+def save_game_result():
+    game_date = datetime.now().strftime('%Y-%m-%d %H:%M')
+    winner = get_winner_name(result)
+    log_string = f'{game_date} {result}{winner}\n'
+    with open('results.txt', 'a') as results:
+        results.write(log_string)
+
+
 def main():
-    print('Добро пожаловать в игру "крестики-нолики"!\n')
+    print('Добро пожаловать в игру "крестики-нолики"!')
 
     game = Board()
     draw_lines()
@@ -154,8 +151,13 @@ def main():
                     current_player = next_player(current_player)
                     draw_figures(game.board)
 
+                if not running:
+                    pygame.display.update()
+                    save_game_result()
+
         pygame.display.update()
 
+    print('Спасибо за игру!')
     sleep(1)
     pygame.quit()
 
