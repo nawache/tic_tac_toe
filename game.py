@@ -91,7 +91,7 @@ def draw_figures(board):
                 )
 
 
-def next_player(player):
+def switch_player(player):
     return 'O' if player == 'X' else 'X'
 
 
@@ -129,7 +129,7 @@ def main():
     game = Board()
     draw_lines()
 
-    current_player = 'X'
+    human_player = 'X'
 
     running = True
     while running:
@@ -146,9 +146,12 @@ def main():
                 clicked_col = mouse_y // CELL_SIZE
 
                 if game.board[clicked_row][clicked_col] == ' ':
-                    game.make_move(clicked_row, clicked_col, current_player)
-                    running = check_for_game_over(game, current_player)
-                    current_player = next_player(current_player)
+                    game.make_move(clicked_row, clicked_col, human_player)
+                    running = check_for_game_over(game, human_player)
+                    if running:
+                        ai_player = switch_player(human_player)
+                        game.ai_make_move(ai_player)
+                        running = check_for_game_over(game, ai_player)
                     draw_figures(game.board)
 
                 if not running:

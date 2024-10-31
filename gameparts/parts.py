@@ -1,3 +1,6 @@
+from random import randint
+
+
 # Объявить класс.
 class Board:
     """Класс, который описывает игровое поле."""
@@ -8,9 +11,28 @@ class Board:
         self.board = [[' ' for i in range(self.field_size)]
                       for i in range(self.field_size)]
 
-    # Метод, который обрабатывает ходы игроков.
+    # Метод, который обрабатывает ходы человека.
     def make_move(self, row, col, player):
         self.board[row][col] = player
+
+    # Метод, который выбирает поле для хода компьютера.
+    def ai_cell_picker(self):
+        # Создаём пустой список
+        free_cells = []
+
+        # Ищем свободные ячейки, вносим их координаты в список
+        for row in range(self.field_size):
+            for column in range(self.field_size):
+                if self.board[row][column] == ' ':
+                    free_cells.append((row, column))
+
+        # Возвращаем пару координат, выбранных случайным образом
+        return free_cells[randint(0, len(free_cells) - 1)]
+
+    # Метод, который обрабатывает ходы комрьютера.
+    def ai_make_move(self, player):
+        row, column = self.ai_cell_picker()
+        self.make_move(row, column, player)
 
     # Метод, который проверяет, остались ли свободные ячейки.
     def is_board_full(self):
